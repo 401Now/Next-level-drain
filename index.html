@@ -12,7 +12,7 @@
         .stats { margin: 20px 0; padding: 15px; background: #2f3542; border-radius: 10px; display: inline-block; min-width: 200px; }
         .total-amount { font-size: 2.5rem; color: #2ed573; font-weight: bold; margin: 5px 0; }
         
-        #spin-btn { background: #ffa502; color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #spin-btn { background: #ffa502; color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%; max-width: 300px; }
         #spin-btn:disabled { background: #747d8c; cursor: not-allowed; }
         
         #pay-link { display: none; margin-top: 20px; padding: 18px 40px; background: #008CFF; color: white; text-decoration: none; border-radius: 35px; font-weight: bold; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,140,255,0.4); }
@@ -34,7 +34,7 @@
 
     <button id="spin-btn" onclick="spinWheel()">SPIN TO ADD AMOUNT</button>
     <br>
-    <a id="pay-link" href="#">SEND TOTAL TO VENMO</a>
+    <a id="pay-link" href="#" target="_blank">SEND TOTAL TO VENMO</a>
 
 <script>
     const canvas = document.getElementById('canvas');
@@ -43,9 +43,8 @@
     const payLink = document.getElementById('pay-link');
     const spinBtn = document.getElementById('spin-btn');
 
-    // Prizes: 25, 50, 75, 100 duplicated for 8 slots total
-    const basePrizes = [25, 50, 75, 100, 25, 50, 75, 100];
-    const prizes = basePrizes.sort(() => Math.random() - 0.5); 
+    // Prize setup
+    const prizes = [25, 50, 75, 100, 25, 50, 75, 100].sort(() => Math.random() - 0.5);
     const colors = ['#1e90ff', '#2ed573', '#ff4757', '#ffa502', '#3742fa', '#70a1ff', '#7bed9f', '#ff6b81'];
     
     let currentRotation = 0;
@@ -65,8 +64,9 @@
             ctx.translate(200, 200);
             ctx.rotate(i * angle + angle / 2);
             ctx.fillStyle = "white";
-            ctx.font = "bold 24px Arial";
-            ctx.fillText("$" + prizes[i], 110, 10);
+            ctx.font = "bold 26px Arial";
+            ctx.textAlign = "right";
+            ctx.fillText("$" + prizes[i], 170, 10);
             ctx.restore();
         }
     }
@@ -76,31 +76,30 @@
         spinBtn.disabled = true;
         payLink.style.display = 'none';
 
-        const spins = 3600; // Increased speed
-        const extraDegrees = Math.floor(Math.random() * 360);
-        currentRotation += (spins + extraDegrees); 
+        const extraRotation = Math.floor(Math.random() * 360) + 1440; // At least 4 full spins
+        currentRotation += extraRotation;
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(() => {
-            const actualDegree = currentRotation % 360;
-            const segmentSize = 360 / prizes.length;
-            const prizeIndex = Math.floor((360 - (actualDegree % 360)) / segmentSize) % prizes.length;
+            // Corrected Prize Calculation for TOP pointer
+            const netRotation = currentRotation % 360;
+            const segmentAngle = 360 / prizes.length;
+            
+            // 270 degrees is the offset for the TOP of the circle in canvas math
+            const prizeIndex = Math.floor((360 - netRotation + 270) % 360 / segmentAngle);
             const landedAmount = prizes[prizeIndex];
 
             totalContribution += landedAmount;
             display.innerText = `$${totalContribution}`;
 
-            // Configuration with new requirements
             const myUsername = "outcastjaxton"; 
             const note = encodeURIComponent("small business support");
-            // note parameter is standard for Venmo deep links
             const venmoUrl = `venmo://paycharge?txn=pay&recipients=${myUsername}&amount=${totalContribution}&note=${note}`;
 
             payLink.href = venmoUrl;
             payLink.style.display = 'inline-block';
             spinBtn.disabled = false;
             spinBtn.innerText = "SPIN AGAIN TO ADD MORE";
-            
         }, 4000);
     }
 </script>
