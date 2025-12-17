@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Spin - outcastjaxton</title>
+    <title>Assisted Findom - outcastjaxton</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #1a1a1a; color: white; padding: 20px; }
         #wheel-container { position: relative; width: 320px; height: 320px; margin: 20px auto; }
@@ -16,15 +16,14 @@
         #spin-btn:disabled { background: #747d8c; cursor: not-allowed; }
         
         #pay-link { display: none; margin-top: 20px; padding: 18px 40px; background: #008CFF; color: white; text-decoration: none; border-radius: 35px; font-weight: bold; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,140,255,0.4); }
-        #pay-link:hover { background: #0076d6; }
     </style>
 </head>
 <body>
 
-    <h2>Small Business Support</h2>
+    <h2>Assisted Findom</h2>
     
     <div class="stats">
-        <div>Total Contribution</div>
+        <div>Current Total</div>
         <div class="total-amount" id="display-amount">$0</div>
     </div>
 
@@ -44,15 +43,14 @@
     const payLink = document.getElementById('pay-link');
     const spinBtn = document.getElementById('spin-btn');
 
-    // Setup prizes: 25, 50, 75, 100 duplicated for 8 slots total
+    // Prizes: 25, 50, 75, 100 duplicated for 8 slots total
     const basePrizes = [25, 50, 75, 100, 25, 50, 75, 100];
-    const prizes = basePrizes.sort(() => Math.random() - 0.5); // Randomize order
+    const prizes = basePrizes.sort(() => Math.random() - 0.5); 
     const colors = ['#1e90ff', '#2ed573', '#ff4757', '#ffa502', '#3742fa', '#70a1ff', '#7bed9f', '#ff6b81'];
     
     let currentRotation = 0;
     let totalContribution = 0;
 
-    // Draw the Wheel
     function drawWheel() {
         const segments = prizes.length;
         const angle = (2 * Math.PI / segments);
@@ -78,26 +76,25 @@
         spinBtn.disabled = true;
         payLink.style.display = 'none';
 
-        const spins = 2880; // 8 full rotations
+        const spins = 3600; // Increased speed
         const extraDegrees = Math.floor(Math.random() * 360);
         currentRotation += (spins + extraDegrees); 
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(() => {
-            // Calculate landed prize
             const actualDegree = currentRotation % 360;
             const segmentSize = 360 / prizes.length;
             const prizeIndex = Math.floor((360 - (actualDegree % 360)) / segmentSize) % prizes.length;
             const landedAmount = prizes[prizeIndex];
 
-            // Update Total
             totalContribution += landedAmount;
             display.innerText = `$${totalContribution}`;
 
-            // Update Venmo Link
+            // Configuration with new requirements
             const myUsername = "outcastjaxton"; 
-            const note = encodeURIComponent("Small Business Support");
-            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${myUsername}&amount=${totalContribution}&notes=${note}`;
+            const note = encodeURIComponent("small business support");
+            // note parameter is standard for Venmo deep links
+            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${myUsername}&amount=${totalContribution}&note=${note}`;
 
             payLink.href = venmoUrl;
             payLink.style.display = 'inline-block';
@@ -110,4 +107,3 @@
 
 </body>
 </html>
-
