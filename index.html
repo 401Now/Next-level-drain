@@ -2,96 +2,112 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Spin - outcastjaxton</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f7f6; padding: 20px; }
-        #wheel-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
-        #canvas { 
-            width: 100%; height: 100%;
-            border-radius: 50%; border: 5px solid #333; 
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); 
-        }
-        #pointer { 
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            width: 0; height: 0; border-left: 15px solid transparent; 
-            border-right: 15px solid transparent; border-top: 30px solid red; z-index: 10; 
-        }
-        #spin-btn, #pay-link { 
-            display: inline-block; margin-top: 20px; padding: 15px 30px; 
-            background: #3d95ce; color: white; text-decoration: none; 
-            border-radius: 25px; font-weight: bold; border: none; font-size: 1rem;
-        }
-        #pay-link { background: #008CFF; display: none; } /* Venmo Blue */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #1a1a1a; color: white; padding: 20px; }
+        #wheel-container { position: relative; width: 320px; height: 320px; margin: 20px auto; }
+        #canvas { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #444; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 35px solid #ff4757; z-index: 10; }
+        
+        .stats { margin: 20px 0; padding: 15px; background: #2f3542; border-radius: 10px; display: inline-block; min-width: 200px; }
+        .total-amount { font-size: 2.5rem; color: #2ed573; font-weight: bold; margin: 5px 0; }
+        
+        #spin-btn { background: #ffa502; color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #spin-btn:disabled { background: #747d8c; cursor: not-allowed; }
+        
+        #pay-link { display: none; margin-top: 20px; padding: 18px 40px; background: #008CFF; color: white; text-decoration: none; border-radius: 35px; font-weight: bold; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,140,255,0.4); }
+        #pay-link:hover { background: #0076d6; }
     </style>
 </head>
 <body>
 
-    <h2>Small Business Support Spin</h2>
+    <h2>Small Business Support</h2>
+    
+    <div class="stats">
+        <div>Total Contribution</div>
+        <div class="total-amount" id="display-amount">$0</div>
+    </div>
 
     <div id="wheel-container">
         <div id="pointer"></div>
-        <canvas id="canvas" width="300" height="300"></canvas>
+        <canvas id="canvas" width="400" height="400"></canvas>
     </div>
 
-    <button id="spin-btn" onclick="spinWheel()">SPIN THE WHEEL</button>
-    
-    <a id="pay-link" href="#">TAP TO PAY ON VENMO</a>
+    <button id="spin-btn" onclick="spinWheel()">SPIN TO ADD AMOUNT</button>
+    <br>
+    <a id="pay-link" href="#">SEND TOTAL TO VENMO</a>
 
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const prizes = [1, 5, 10, 2, 20, 3];
-    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FFF333', '#33FFF3'];
-    let currentRotation = 0;
+    const display = document.getElementById('display-amount');
+    const payLink = document.getElementById('pay-link');
+    const spinBtn = document.getElementById('spin-btn');
 
-    // Draw Wheel
-    prizes.forEach((prize, i) => {
-        const angle = (2 * Math.PI / prizes.length);
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(150, 150);
-        ctx.arc(150, 150, 150, i * angle, (i + 1) * angle);
-        ctx.fill();
-        ctx.save();
-        ctx.translate(150, 150);
-        ctx.rotate(i * angle + angle / 2);
-        ctx.fillStyle = "black";
-        ctx.font = "bold 16px Arial";
-        ctx.fillText("$" + prize, 80, 5);
-        ctx.restore();
-    });
+    // Setup prizes: 25, 50, 75, 100 duplicated for 8 slots total
+    const basePrizes = [25, 50, 75, 100, 25, 50, 75, 100];
+    const prizes = basePrizes.sort(() => Math.random() - 0.5); // Randomize order
+    const colors = ['#1e90ff', '#2ed573', '#ff4757', '#ffa502', '#3742fa', '#70a1ff', '#7bed9f', '#ff6b81'];
+    
+    let currentRotation = 0;
+    let totalContribution = 0;
+
+    // Draw the Wheel
+    function drawWheel() {
+        const segments = prizes.length;
+        const angle = (2 * Math.PI / segments);
+        for(let i=0; i<segments; i++) {
+            ctx.beginPath();
+            ctx.fillStyle = colors[i];
+            ctx.moveTo(200, 200);
+            ctx.arc(200, 200, 200, i * angle, (i + 1) * angle);
+            ctx.fill();
+            
+            ctx.save();
+            ctx.translate(200, 200);
+            ctx.rotate(i * angle + angle / 2);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px Arial";
+            ctx.fillText("$" + prizes[i], 110, 10);
+            ctx.restore();
+        }
+    }
+    drawWheel();
 
     function spinWheel() {
-        const payLink = document.getElementById('pay-link');
-        const spinBtn = document.getElementById('spin-btn');
-        
-        payLink.style.display = 'none';
         spinBtn.disabled = true;
+        payLink.style.display = 'none';
 
-        // Increase rotation significantly for a "fast" spin
-        const addedRotation = Math.floor(Math.random() * 360) + 1800; // 5 full circles + random
-        currentRotation += addedRotation;
+        const spins = 2880; // 8 full rotations
+        const extraDegrees = Math.floor(Math.random() * 360);
+        currentRotation += (spins + extraDegrees); 
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(() => {
+            // Calculate landed prize
             const actualDegree = currentRotation % 360;
-            // Calculate prize based on pointer at top (270 degrees in canvas math)
-            const prizeIndex = Math.floor((360 - (actualDegree % 360)) / (360 / prizes.length)) % prizes.length;
-            const amount = prizes[prizeIndex];
+            const segmentSize = 360 / prizes.length;
+            const prizeIndex = Math.floor((360 - (actualDegree % 360)) / segmentSize) % prizes.length;
+            const landedAmount = prizes[prizeIndex];
 
-            // CONFIG
-            const myUsername = "YourVenmoHandle"; 
+            // Update Total
+            totalContribution += landedAmount;
+            display.innerText = `$${totalContribution}`;
+
+            // Update Venmo Link
+            const myUsername = "outcastjaxton"; 
             const note = encodeURIComponent("Small Business Support");
-            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${myUsername}&amount=${amount}&notes=${note}`;
+            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${myUsername}&amount=${totalContribution}&notes=${note}`;
 
-            // Show the Pay button
             payLink.href = venmoUrl;
-            payLink.innerHTML = `PAY $${amount} NOW`;
             payLink.style.display = 'inline-block';
             spinBtn.disabled = false;
+            spinBtn.innerText = "SPIN AGAIN TO ADD MORE";
             
         }, 4000);
     }
 </script>
 
 </body>
-</html
+</html>
+
